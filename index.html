@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#09090b">
+<title>סטופר לפאנל · Agentic Engineering</title>
+<style>
+* { box-sizing: border-box; }
+:root { color-scheme: dark; font-family: Arial, sans-serif; background: #09090b; color: #fafafa; }
+body { margin: 0; min-height: 100dvh; }
+button { font: inherit; cursor: pointer; }
+button:focus-visible { outline: 3px solid #c4b5fd; outline-offset: 5px; }
+header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 28px 4vw; }
+.brand { font-size: 14px; letter-spacing: .04em; color: #a1a1aa; }
+.utility { border: 1px solid #303036; border-radius: 10px; color: #a1a1aa; background: transparent; padding: 9px 14px; }
+main { min-height: calc(100dvh - 100px); display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 340px); gap: 5vw; max-width: 1600px; margin: auto; padding: 3vh 5vw 6vh; align-items: center; }
+.clock-panel { text-align: center; min-width: 0; }
+.eyebrow { font-size: 14px; letter-spacing: .08em; color: #a1a1aa; margin: 0 0 28px; }
+h1 { font-size: clamp(22px, 2.6vw, 38px); font-weight: 400; margin: 0; }
+.time { font-family: Arial, sans-serif; font-size: clamp(82px, 14vw, 220px); font-weight: 600; letter-spacing: -.055em; line-height: 1.2; font-variant-numeric: tabular-nums; margin: 15px 0; direction: ltr; }
+.remaining { color: #a1a1aa; font-size: 17px; margin: 0 0 28px; }
+progress { width: min(100%, 650px); height: 5px; border: 0; border-radius: 10px; overflow: hidden; display: block; margin: 0 auto 36px; background: #25252b; accent-color: #a78bfa; }
+progress::-webkit-progress-bar { background: #25252b; }
+progress::-webkit-progress-value { background: #a78bfa; }
+.controls { display: flex; justify-content: center; gap: 12px; }
+.primary, .secondary { min-width: 125px; padding: 15px 30px; border-radius: 12px; font-size: 19px; font-weight: 600; }
+.primary { background: #fafafa; color: #09090b; border: 1px solid #fafafa; }
+.secondary { border: 1px solid #3f3f46; background: transparent; color: #d4d4d8; }
+.hint { font-size: 13px; color: #71717a; margin-top: 22px; }
+aside { border-right: 1px solid #27272a; padding-right: 28px; }
+.notice { border: 1px solid #393342; border-radius: 18px; padding: 24px; background: #15121c; min-height: 150px; margin-bottom: 28px; }
+.notice-label { color: #c4b5fd; font-size: 13px; display: block; margin-bottom: 13px; }
+.notice h2 { margin: 0; font-size: 25px; line-height: 1.35; }
+.notice p { margin: 12px 0 0; color: #a1a1aa; font-size: 14px; line-height: 1.5; }
+.notice.alert { border-color: #a78bfa; animation: highlight .6s ease-out; }
+.notice.finished { background: #18231e; border-color: #6ee7b7; }
+.notice.finished .notice-label { color: #6ee7b7; }
+.timeline-title { font-size: 13px; color: #a1a1aa; font-weight: 400; margin: 0 0 18px; }
+ol { list-style: none; padding: 0; margin: 0; }
+li { display: flex; align-items: center; gap: 15px; padding: 12px 0; color: #71717a; font-size: 15px; }
+li time { font-variant-numeric: tabular-nums; direction: ltr; min-width: 42px; }
+li::before { content: ''; width: 6px; height: 6px; flex: none; border-radius: 50%; background: #3f3f46; }
+li.next { color: #fafafa; }
+li.next::before { background: #c4b5fd; box-shadow: 0 0 0 4px #c4b5fd18; }
+li.done { color: #a1a1aa; }
+li.done::before { background: #a78bfa; }
+@keyframes highlight { from { background: #39304f; } to { background: #15121c; } }
+@media (max-width: 850px) {
+ header { padding: 18px 5vw; }
+ main { grid-template-columns: 1fr; padding-top: 20px; gap: 35px; }
+ .time { font-size: clamp(88px, 22vw, 170px); }
+ aside { border-right: 0; border-top: 1px solid #27272a; padding: 25px 0 0; }
+ .notice { min-height: 0; }
+ li { padding: 10px 0; }
+ .eyebrow { margin-bottom: 14px; }
+}
+@media (min-width: 851px) and (max-height: 720px) {
+ header { padding-block: 14px; }
+ main { padding-top: 0; padding-bottom: 20px; }
+ li { padding: 8px 0; }
+ .notice { padding: 18px; min-height: 130px; margin-bottom: 18px; }
+ .time { font-size: 20vh; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+</style>
+</head>
+<body>
+<header>
+ <span class="brand" dir="ltr">Agentic Engineering / Panel timer</span>
+ <button class="utility" id="fullscreen" type="button">מסך מלא</button>
+</header>
+<main>
+ <section class="clock-panel" aria-label="סטופר לפאנל">
+  <p class="eyebrow">נושא אחד. שני צדדים. זמן לכל קול.</p>
+  <h1 id="status">מוכנים להתחיל?</h1>
+  <div class="time" id="elapsed" role="timer" aria-label="הזמן שחלף">00:00</div>
+  <p class="remaining">נותרו <bdi id="remaining">09:40</bdi> עד לסיום</p>
+  <progress id="progress" max="580" value="0" aria-label="התקדמות הדיון"></progress>
+  <div class="controls">
+   <button class="primary" id="toggle" type="button">התחלה</button>
+   <button class="secondary" id="reset" type="button">איפוס</button>
+  </div>
+  <p class="hint">רווח — התחלה / השהיה · F — מסך מלא</p>
+ </section>
+ <aside aria-label="התראות ולוח זמנים">
+  <div class="notice" id="notice" role="status" aria-live="polite" aria-atomic="true">
+   <span class="notice-label" id="notice-label">על סדר היום</span>
+   <h2 id="notice-title">הבמה שלכם</h2>
+   <p id="notice-detail">לחצו על התחלה. ההתראות יופיעו כאן בזמן.</p>
+  </div>
+  <h2 class="timeline-title">נקודות המעבר</h2>
+  <ol id="timeline"></ol>
+ </aside>
+</main>
+<script>
+const TimerState = Object.freeze({ READY: 'ready', RUNNING: 'running', PAUSED: 'paused', FINISHED: 'finished' })
+const schedule = [
+ { seconds: 70, title: 'הגיע הזמן לדובר הבא', label: 'דובר הבא', detail: 'מעבירים את רשות הדיבור לדובר הבא באותו צד.' },
+ { seconds: 160, title: 'עוברים לצד השני', label: 'החלפת צד', detail: 'הצד השני מקבל עכשיו את רשות הדיבור.' },
+ { seconds: 250, title: 'הגיע הזמן לדובר הבא', label: 'דובר הבא', detail: 'מעבירים את רשות הדיבור לדובר הבא באותו צד.' },
+ { seconds: 340, title: 'מחליפים צד', label: 'החלפת צד', detail: 'חוזרים לצד השני לסבב נוסף.' },
+ { seconds: 430, title: 'הגיע הזמן לדובר הבא', label: 'דובר הבא', detail: 'מעבירים את רשות הדיבור לדובר הבא באותו צד.' },
+ { seconds: 520, title: 'דקה אחרונה לסיכום', label: 'דקת סיכום', detail: 'מסכמים את הנושא. נותרה דקה אחת.' },
+ { seconds: 580, title: 'הזמן הסתיים', label: 'סיום', detail: 'תודה לכולם! אפשר לעבור לנושא הבא.' }
+]
+const duration = schedule[schedule.length - 1].seconds
+const elapsedElement = document.getElementById('elapsed')
+const remainingElement = document.getElementById('remaining')
+const toggleButton = document.getElementById('toggle')
+const statusElement = document.getElementById('status')
+const progressElement = document.getElementById('progress')
+const noticeElement = document.getElementById('notice')
+const noticeLabel = document.getElementById('notice-label')
+const noticeTitle = document.getElementById('notice-title')
+const noticeDetail = document.getElementById('notice-detail')
+const timelineElement = document.getElementById('timeline')
+let state = TimerState.READY
+let savedElapsed = 0
+let startedAt = 0
+let activeNotice = -1
+
+function formatTime(seconds) {
+ const minutes = Math.floor(seconds / 60).toString().padStart(2, '0')
+ return `${minutes}:${(seconds % 60).toString().padStart(2, '0')}`
+}
+
+for (const event of schedule) {
+ const item = document.createElement('li')
+ const time = document.createElement('time')
+ time.textContent = formatTime(event.seconds)
+ const label = document.createElement('span')
+ label.textContent = event.label
+ item.append(time, label)
+ timelineElement.append(item)
+}
+progressElement.max = duration
+
+function elapsedMilliseconds() {
+ if (state !== TimerState.RUNNING) return savedElapsed
+ return savedElapsed + performance.now() - startedAt
+}
+
+function render() {
+ const elapsed = Math.min(duration, Math.floor(elapsedMilliseconds() / 1000))
+ elapsedElement.textContent = formatTime(elapsed)
+ remainingElement.textContent = formatTime(duration - elapsed)
+ progressElement.value = elapsed
+ let reached = -1
+ schedule.forEach((event, index) => {
+  if (elapsed >= event.seconds) reached = index
+ })
+ if (reached !== activeNotice) {
+  activeNotice = reached
+  if (reached >= 0) {
+   const event = schedule[reached]
+   noticeLabel.textContent = `עכשיו · ${formatTime(event.seconds)}`
+   noticeTitle.textContent = event.title
+   noticeDetail.textContent = event.detail
+   noticeElement.classList.remove('alert')
+   void noticeElement.offsetWidth
+   noticeElement.classList.add('alert')
+  }
+ }
+ ;[...timelineElement.children].forEach((item, index) => {
+  item.classList.toggle('done', index <= reached)
+  item.classList.toggle('next', index === reached + 1)
+ })
+ if (elapsed >= duration && state !== TimerState.FINISHED) {
+  savedElapsed = duration * 1000
+  state = TimerState.FINISHED
+  noticeElement.classList.add('finished')
+  updateControls()
+ }
+}
+
+function updateControls() {
+ const labels = {
+  [TimerState.READY]: ['התחלה', 'מוכנים להתחיל?'],
+  [TimerState.RUNNING]: ['השהיה', 'הדיון בעיצומו'],
+  [TimerState.PAUSED]: ['המשך', 'הזמן מושהה'],
+  [TimerState.FINISHED]: ['נושא חדש', 'הדיון הסתיים']
+ }
+ const [buttonLabel, statusLabel] = labels[state]
+ toggleButton.textContent = buttonLabel
+ statusElement.textContent = statusLabel
+}
+
+function resetTimer() {
+ state = TimerState.READY
+ savedElapsed = 0
+ startedAt = 0
+ activeNotice = -1
+ noticeElement.classList.remove('alert', 'finished')
+ noticeLabel.textContent = 'על סדר היום'
+ noticeTitle.textContent = 'הבמה שלכם'
+ noticeDetail.textContent = 'לחצו על התחלה. ההתראות יופיעו כאן בזמן.'
+ updateControls()
+ render()
+}
+
+function toggleTimer() {
+ render()
+ if (state === TimerState.RUNNING) {
+  savedElapsed = elapsedMilliseconds()
+  state = TimerState.PAUSED
+ } else {
+  if (state === TimerState.FINISHED) resetTimer()
+  startedAt = performance.now()
+  state = TimerState.RUNNING
+ }
+ updateControls()
+ render()
+}
+
+async function toggleFullscreen() {
+ if (document.fullscreenElement) {
+  await document.exitFullscreen()
+  return
+ }
+ if (document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen()
+}
+
+toggleButton.addEventListener('click', toggleTimer)
+document.getElementById('reset').addEventListener('click', resetTimer)
+document.getElementById('fullscreen').addEventListener('click', () => toggleFullscreen().catch(() => {}))
+document.addEventListener('keydown', event => {
+ if (event.repeat || event.target.closest('button, input, textarea, select')) return
+ if (event.code === 'Space') {
+  event.preventDefault()
+  toggleTimer()
+ }
+ if (event.key.toLowerCase() === 'f') toggleFullscreen().catch(() => {})
+})
+document.addEventListener('fullscreenchange', () => {
+ document.getElementById('fullscreen').textContent = document.fullscreenElement ? 'יציאה ממסך מלא' : 'מסך מלא'
+})
+document.addEventListener('visibilitychange', render)
+setInterval(render, 100)
+render()
+</script>
+</body>
+</html>
