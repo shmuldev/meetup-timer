@@ -75,8 +75,8 @@ li.done::before { background: #a78bfa; }
   <p class="eyebrow">נושא אחד. שני צדדים. זמן לכל קול.</p>
   <h1 id="status">מוכנים להתחיל?</h1>
   <div class="time" id="elapsed" role="timer" aria-label="הזמן שחלף">00:00</div>
-  <p class="remaining">נותרו <bdi id="remaining">09:40</bdi> עד לסיום</p>
-  <progress id="progress" max="580" value="0" aria-label="התקדמות הדיון"></progress>
+  <p class="remaining">נותרו <bdi id="remaining">11:00</bdi> עד לסיום</p>
+  <progress id="progress" max="660" value="0" aria-label="התקדמות הדיון"></progress>
   <div class="controls">
    <button class="primary" id="toggle" type="button">התחלה</button>
    <button class="secondary" id="reset" type="button">איפוס</button>
@@ -96,13 +96,15 @@ li.done::before { background: #a78bfa; }
 <script>
 const TimerState = Object.freeze({ READY: 'ready', RUNNING: 'running', PAUSED: 'paused', FINISHED: 'finished' })
 const schedule = [
- { seconds: 70, title: 'הגיע הזמן לדובר הבא', label: 'דובר הבא', detail: 'מעבירים את רשות הדיבור לדובר הבא באותו צד.' },
- { seconds: 160, title: 'עוברים לצד השני', label: 'החלפת צד', detail: 'הצד השני מקבל עכשיו את רשות הדיבור.' },
- { seconds: 250, title: 'הגיע הזמן לדובר הבא', label: 'דובר הבא', detail: 'מעבירים את רשות הדיבור לדובר הבא באותו צד.' },
- { seconds: 340, title: 'מחליפים צד', label: 'החלפת צד', detail: 'חוזרים לצד השני לסבב נוסף.' },
- { seconds: 430, title: 'הגיע הזמן לדובר הבא', label: 'דובר הבא', detail: 'מעבירים את רשות הדיבור לדובר הבא באותו צד.' },
- { seconds: 520, title: 'דקה אחרונה לסיכום', label: 'דקת סיכום', detail: 'מסכמים את הנושא. נותרה דקה אחת.' },
- { seconds: 580, title: 'הזמן הסתיים', label: 'סיום', detail: 'תודה לכולם! אפשר לעבור לנושא הבא.' }
+ { seconds: 90, title: 'הגיע הזמן לדובר הבא', label: 'דובר הבא', detail: 'מעבירים את רשות הדיבור לדובר הבא באותו צד.' },
+ { seconds: 180, title: 'עוברים לצד השני', label: 'החלפת צד', detail: 'שלוש דקות לצד השני בסבב הראשון.' },
+ { seconds: 270, title: 'הגיע הזמן לדובר הבא', label: 'דובר הבא', detail: 'מעבירים את רשות הדיבור לדובר הבא באותו צד.' },
+ { seconds: 360, title: 'מתחילים סבב שני', label: 'סבב שני · החלפת צד', detail: 'חוזרים לצד הראשון. שתי דקות לכל צד בסבב הזה.' },
+ { seconds: 420, title: 'הגיע הזמן לדובר הבא', label: 'דובר הבא', detail: 'מעבירים את רשות הדיבור לדובר הבא באותו צד.' },
+ { seconds: 480, title: 'עוברים לצד השני', label: 'החלפת צד', detail: 'שתי דקות לצד השני בסבב השני.' },
+ { seconds: 540, title: 'הגיע הזמן לדובר הבא', label: 'דובר הבא', detail: 'מעבירים את רשות הדיבור לדובר הבא באותו צד.' },
+ { seconds: 600, title: 'דקה אחרונה לסיכום', label: 'דקת סיכום', detail: 'מסכמים את הנושא. נותרה דקה אחת.' },
+ { seconds: 660, title: 'הזמן הסתיים', label: 'סיום', detail: 'תודה לכולם! אפשר לעבור לנושא הבא.' }
 ]
 const duration = schedule[schedule.length - 1].seconds
 const elapsedElement = document.getElementById('elapsed')
